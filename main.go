@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"github.com/google/gopacket"
 	_ "github.com/google/gopacket"
+	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 	"log"
 	"strings"
 	"time"
 )
+
+
 
 func main(){
 	// Find all devices
@@ -38,16 +41,44 @@ func main(){
 	}
 
 	//netCardName1 := "\\Device\\NPF_{A03165A0-9781-4C35-8298-FEC0E040754A}"
-	handle, err := pcap.OpenLive(netCardName, 1024, false, 30*time.Second)
+	handle, err := pcap.OpenLive(netCardName, 1600, true, 30*time.Second)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer handle.Close()
 
+	//设置过滤
+	if err := handle.SetBPFFilter("tcp and (port 80)"); err != nil {
+		log.Fatal(err)
+	}
+
 	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
-	for packet := range packetSource.Packets() {
-		// Process packet here
-		log.Println(packet)
+	//for packet := range packetSource.Packets() {
+	//	// Process packet here
+	//	log.Println(packet)
+	//}
+	packets := packetSource.Packets()
+
+	for {
+		select{
+		case packet := <-packets:
+			if packet == nil {
+				return
+			}
+
+			//log.Println("Packet Detail:")
+			//log.Println(packet)
+			log.Println("TCP:")
+			if packet.NetworkLayer() == nil || packet.TransportLayer() == nil || packet.TransportLayer().LayerType() != layers.LayerTypeTCP {
+				log.Println("Unusable packet")
+				continue
+			}
+			tcp := packet.TransportLayer().(*layers.TCP)
+			//log.Println(tcp)
+			log.Println(tcp.TransportFlow())
+			log.Printf("payload:%v\n", string(tcp.BaseLayer.Payload))
+
+		}
 	}
 }
 

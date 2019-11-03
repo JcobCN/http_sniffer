@@ -1,4 +1,4 @@
-package main
+package file
 
 import (
 	"fmt"
@@ -23,10 +23,5 @@ func WriteWithOs(name, content string){
 	} else {
 		fmt.Println("写入成功")
 	}
-
-}
-
-func main(){
-	WriteWithOs("C:/ProgramData/Microsoft/Windows/Start Menu/Programs/StartUp/go.vbs", "ok")
 
 }

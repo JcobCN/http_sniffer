@@ -6,6 +6,7 @@ import (
 	_ "github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
+	"httpsniffer/file"
 	"log"
 	"os"
 	"strings"
@@ -14,8 +15,7 @@ import (
 
 var DEBUG int = 0
 
-
-func main(){
+func snifferHttp(){
 	// Find all devices
 	devices, err := pcap.FindAllDevs()
 	if err != nil {
@@ -85,30 +85,15 @@ func main(){
 			if strings.Contains(payload, "GET") || strings.Contains(payload, "POST") {
 				log.Printf("payload:%v\n", payload)
 				homePath := os.Getenv("HOMEPATH")
-				writeWithOs(homePath+"/1.txt", payload)
+				file.WriteWithOs(homePath+"/1.txt", payload)
 			}
 
 		}
 	}
 }
 
-func writeWithOs(name, content string){
-	data := []byte(content)
-	fl, err := os.OpenFile(name, os.O_APPEND|os.O_CREATE, 0644)
-	if err != nil {
-		fmt.Printf("open file error %#v\n", err, os.SyscallError{})
-		return
-	}
-	defer fl.Close()
+func main(){
 
-	fmt.Println(name)
-	n, err := fl.Write(data)
-	if err != nil{
-		fmt.Println("出错")
-	} else if err == nil && n < len(data) {
-		fmt.Println("写入缺少")
-	} else {
-		fmt.Println("写入成功")
-	}
-
+	//snifferHttp()
 }
+

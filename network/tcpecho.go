@@ -65,12 +65,4 @@ func TcpClient(addr string){
 	}
 	defer conn.Close()
 
-	书 := 给我一本书()
-	
-
-
-}
-
-func 给我一本书()(书名 string){
-	return "少年闰土"
 }

@@ -79,6 +79,6 @@ func tcpClientHandle(conn *net.TCPConn){
 	//reader := bufio.NewReader(conn)
 	b := []byte(conn.LocalAddr().String()+"Hello control server")
 	conn.Write(b)
-
 }
+
 

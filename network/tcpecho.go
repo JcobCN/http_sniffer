@@ -30,11 +30,11 @@ func TcpServer(){
 		fmt.Println("一个客户端已连接："+tcpConn.RemoteAddr().String())
 
 		//启用一个gorutine
-		go tcpHandle(tcpConn)
+		go tcpServerHandle(tcpConn)
 	}
 }
 
-func tcpHandle(conn *net.TCPConn){
+func tcpServerHandle(conn *net.TCPConn){
 	ipStr := conn.RemoteAddr().String()
 
 	defer func(){
@@ -47,7 +47,7 @@ func tcpHandle(conn *net.TCPConn){
 
 	//接收消息
 	for{
-		message, err := reader.ReadByte()
+		message, err := reader.ReadBytes(byte(0x00))
 		if err != nil{
 			fmt.Println("读取信息出错")
 			break
@@ -58,19 +58,27 @@ func tcpHandle(conn *net.TCPConn){
 }
 
 func TcpClient(addr string){
-	conn, err := net.Dial("tcp", addr+)
+	tcpAddr, err := net.ResolveTCPAddr("tcp", addr+":32333")
+	if err != nil{
+		fmt.Printf("err %+v\n",err)
+	}
+
+	conn, err := net.DialTCP("tcp", nil, tcpAddr)
 	if err != nil{
 		fmt.Println(addr+"连接失败：", err)
 		return
 	}
 	defer conn.Close()
 
-	书 := 给我一本书()
-	
+	fmt.Println(addr+" 连接成功")
 
+	tcpClientHandle(conn)
+}
+
+func tcpClientHandle(conn *net.TCPConn){
+	//reader := bufio.NewReader(conn)
+	b := []byte(conn.LocalAddr().String()+"Hello control server")
+	conn.Write(b)
 
 }
 
-func 给我一本书()(书名 string){
-	return "少年闰土"
-}

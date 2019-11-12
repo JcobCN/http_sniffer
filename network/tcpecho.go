@@ -3,6 +3,7 @@ package network
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"net"
 )
 
@@ -76,9 +77,30 @@ func TcpClient(addr string){
 }
 
 func tcpClientHandle(conn *net.TCPConn){
-	//reader := bufio.NewReader(conn)
 	b := []byte(conn.LocalAddr().String()+"Hello control server")
 	conn.Write(b)
+
+	reader := bufio.NewReader(conn)
+	for {
+		rmsg,err := reader.ReadString('\n')
+		fmt.Println("--->:"+rmsg)
+
+		if err != nil || err == io.EOF{
+			fmt.Println("读取信息出错",err)
+			break
+		}
+
+		fmt.Println("请输入：")
+		wmsg := ""
+		fmt.Scanln(&wmsg)
+
+		_,err = conn.Write([]byte(wmsg))
+		if err != nil{
+			fmt.Println(err)
+			break
+		}
+
+	}
 }
 
 

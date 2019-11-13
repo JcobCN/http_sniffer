@@ -6,13 +6,19 @@ import (
 	"os"
 )
 
-func main(){
+func main() {
+
+	// s := ""
+	// fmt.Scanln(&s)
+	// fmt.Println(s)
+	// return
+
 	switch os.Args[1] {
 	case "server":
 		network.TcpServer()
 		//client
 	case "connect":
-		if os.Args[2] == ""{
+		if os.Args[2] == "" {
 			fmt.Println("please input remote ip addr, behind the 'client' command. ")
 			return
 		}

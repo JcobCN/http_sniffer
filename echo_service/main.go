@@ -8,18 +8,18 @@ import (
 
 func main() {
 
-	// s := ""
-	// fmt.Scanln(&s)
-	// fmt.Println(s)
-	// return
+	if len(os.Args) < 2 {
+		fmt.Println("Pls, input argument which is 'server' or 'connect [ip]'")
+		return
+	}
 
 	switch os.Args[1] {
 	case "server":
 		network.TcpServer()
 		//client
 	case "connect":
-		if os.Args[2] == "" {
-			fmt.Println("please input remote ip addr, behind the 'client' command. ")
+		if len(os.Args) < 3 {
+			fmt.Println("please input remote ip addr, behind the 'connect' command. ")
 			return
 		}
 		network.TcpClient(os.Args[2])

@@ -86,7 +86,7 @@ func TcpClient(addr string) {
 	}
 	defer conn.Close()
 
-	fmt.Println(addr + " 连接成功")
+	fmt.Println(addr + " 连接成功,等待接收服务端信息....")
 
 	tcpClientHandle(conn)
 }

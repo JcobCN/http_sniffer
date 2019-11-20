@@ -15,14 +15,17 @@ func main() {
 
 	switch os.Args[1] {
 	case "server":
-		network.TcpServer()
+		// network.TcpServer()
+		network.TcpRemote(remoteHandle)
+
 		//client
 	case "connect":
 		if len(os.Args) < 3 {
 			fmt.Println("please input remote ip addr, behind the 'connect' command. ")
 			return
 		}
-		network.TcpClient(os.Args[2])
+		// network.TcpClient(os.Args[2])
+		network.TcpController(os.Args[2], controllerHandle)
 	default:
 		fmt.Println(os.Args[0] + " arguments is 'server' or 'connect'")
 	}

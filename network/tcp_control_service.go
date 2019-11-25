@@ -9,7 +9,7 @@ import (
 type TCPHandleFunc func(*net.TCPConn)
 
 func TcpRemote(handle TCPHandleFunc) {
-	tcpAddr, err := net.ResolveTCPAddr("tcp", "127.0.0.1:32333")
+	tcpAddr, err := net.ResolveTCPAddr("tcp", "0.0.0.0:32333")
 	if err != nil {
 		fmt.Printf("err %+v\n", err)
 	}

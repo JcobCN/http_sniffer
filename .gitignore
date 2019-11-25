@@ -2,3 +2,4 @@
 *.exe
 main
 .vscode
+go.sum

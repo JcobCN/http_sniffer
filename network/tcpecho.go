@@ -1,3 +1,6 @@
+/*
+	完整的tcp_echo_server.
+ */
 package network
 
 import (

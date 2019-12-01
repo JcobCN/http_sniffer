@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"httpsniffer/network"
+	"net"
 	"os"
 )
 
@@ -19,7 +20,9 @@ func main() {
 
 		//client
 	case "connect":
-		network.BoardCastClient()
+		c := make(chan *net.UDPAddr, 1)
+		network.BoardCastClient(c)
+		fmt.Println(<-c)
 	default:
 		fmt.Println(os.Args[0] + " arguments is 'server' or 'connect'")
 	}

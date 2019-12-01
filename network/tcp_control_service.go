@@ -1,3 +1,6 @@
+/*
+echo_server，分离了handle和连接
+ */
 package network
 
 import (

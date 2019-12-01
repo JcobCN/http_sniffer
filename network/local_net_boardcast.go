@@ -48,7 +48,7 @@ func BoardCastServer()  {
 
 }
 
-func BoardCastClient() error {
+func BoardCastClient(remoteAddr chan *net.UDPAddr) error {
 	addr,err := net.ResolveUDPAddr("udp","0.0.0.0:3000")
 	if err != nil{
 		fmt.Println("解析地址失败")
@@ -65,11 +65,12 @@ func BoardCastClient() error {
 		}
 
 		data := make([]byte, 1024)
-		n, laddr, err := conn.ReadFromUDP(data)
+		n, raddr, err := conn.ReadFromUDP(data)
 		if err != nil {
 			fmt.Println(err)
 		}
-		fmt.Println(string(data[:n]), laddr, n)
+		fmt.Println(string(data[:n]), raddr, n)
+		remoteAddr <- raddr
 		conn.Close()
 	//}
 

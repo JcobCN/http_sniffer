@@ -6,10 +6,14 @@ import (
 	"io"
 	"net"
 	"os"
+	"strings"
 )
 
 var homePath = os.Getenv("HOMEDRIVE")+os.Getenv("HOMEPATH")
 
+func handleStopWriteFile(){
+	fmt.Println("hanle stop write.")
+}
 
 
 func RemoteHandle(conn *net.TCPConn) {
@@ -32,9 +36,20 @@ func RemoteHandle(conn *net.TCPConn) {
 
 		fmt.Print("--->:" + string(message[:n]))
 		caseString := string(message[:n])
-		switch caseString{
-		case "stop_write_file":
+		caseString =strings.Replace(caseString,"\r","", -1)
+		caseString =strings.Replace(caseString,"\n","", -1)
 
+		switch caseString{
+		case "Hello control server":
+			_, err = conn.Write([]byte("connected!\n"))
+			if err != nil{
+				fmt.Printf("err %+v\n", err)
+				return
+			}
+		case "stop_write_file":
+			handleStopWriteFile()
+		default:
+			fmt.Println("dafault msg: " + caseString)
 		}
 
 
@@ -55,10 +70,20 @@ func getMsgFromCLI(conn *net.TCPConn) error {
 }
 
 func ControllerHandle(conn *net.TCPConn) {
-	b := []byte("Hello control server\n")
+	b := []byte("Hello control server")
 	conn.Write(b)
 
 	reader := bufio.NewReader(conn)
+	rmsg, err := reader.ReadBytes('\n')
+	if err != nil || err == io.EOF {
+		fmt.Println("读取信息出错", rmsg, err)
+		return
+	}
+	if string(rmsg) != "connected!\n"{
+		fmt.Println("connect error ")
+		return
+	}
+
 	for {
 		rmsg, err := reader.ReadBytes('\n')
 		if err != nil || err == io.EOF {
@@ -67,11 +92,18 @@ func ControllerHandle(conn *net.TCPConn) {
 		}
 		fmt.Print("--->:" + string(rmsg))
 
-		err = getMsgFromCLI(conn)
-		if err != nil {
-			fmt.Println(err)
-			break
+		switch string(rmsg){
+		case "connected!\n":
+			getMsgFromCLI(conn)
+		default:
+			fmt.Println("default msg: "+string(rmsg))
 		}
+
+		//err = getMsgFromCLI(conn)
+		//if err != nil {
+		//	fmt.Println(err)
+		//	break
+	//	}
 
 	}
 }

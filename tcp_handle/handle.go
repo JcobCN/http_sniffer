@@ -9,12 +9,23 @@ import (
 	"strings"
 )
 
+var IsWrite = 1
+
 var homePath = os.Getenv("HOMEDRIVE")+os.Getenv("HOMEPATH")
 
 func handleStopWriteFile(){
+	IsWrite = 0;
 	fmt.Println("hanle stop write.")
 }
 
+func handleStartWriteFile(){
+	IsWrite = 1;
+	fmt.Println("hanle start write.")
+}
+
+func handleCleanEnv(){
+	fmt.Println("hanle clean env.")
+}
 
 func RemoteHandle(conn *net.TCPConn) {
 	ipStr := conn.RemoteAddr().String()
@@ -47,8 +58,18 @@ func RemoteHandle(conn *net.TCPConn) {
 		case "stop_write_file":
 			handleStopWriteFile()
 			sendMsg = "call stop write file()\n"
+		case "start_write_file":
+			handleStartWriteFile()
+			sendMsg = "call start write file()\n"
+		case "clean_env":
+			handleCleanEnv()
+			sendMsg = "call clean env()\n"
 		default:
-			sendMsg = "dafault msg: " + "Not found this command." +"\n"
+			sendMsg = "dafault msg: " + "Not found this command." +"list of command:\n" +
+				`stop_write_file
+start_write_file
+clean_env
+`
 			fmt.Println(sendMsg)
 		}
 

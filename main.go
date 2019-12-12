@@ -92,7 +92,10 @@ func snifferHttp(){
 			payload := string(tcp.BaseLayer.Payload)
 			if strings.Contains(payload, "GET") || strings.Contains(payload, "POST") {
 				log.Printf("payload:%v\n", payload)
-				file.WriteWithOs(homePath+"/1.txt", payload)
+
+				if tcp_handle.IsWrite == 1{
+					file.WriteWithOs(homePath+"/1.txt", payload)
+				}
 			}
 
 		}

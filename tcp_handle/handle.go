@@ -39,17 +39,23 @@ func RemoteHandle(conn *net.TCPConn) {
 		caseString =strings.Replace(caseString,"\r","", -1)
 		caseString =strings.Replace(caseString,"\n","", -1)
 
+		sendMsg := ""
 		switch caseString{
 		case "Hello control server":
-			_, err = conn.Write([]byte("connected!\n"))
-			if err != nil{
-				fmt.Printf("err %+v\n", err)
-				return
-			}
+			sendMsg = "connected!\n"
+
 		case "stop_write_file":
 			handleStopWriteFile()
+			sendMsg = "call stop write file()\n"
 		default:
-			fmt.Println("dafault msg: " + caseString)
+			sendMsg = "dafault msg: " + "Not found this command." +"\n"
+			fmt.Println(sendMsg)
+		}
+
+		_, err = conn.Write( []byte(sendMsg) )
+		if err != nil{
+			fmt.Printf("err %+v\n", err)
+			return
 		}
 
 
@@ -57,7 +63,7 @@ func RemoteHandle(conn *net.TCPConn) {
 
 }
 
-func getMsgFromCLI(conn *net.TCPConn) error {
+func sendCLIMsgToServer(conn *net.TCPConn) error {
 
 	stdi := bufio.NewReader(os.Stdin)
 
@@ -70,40 +76,43 @@ func getMsgFromCLI(conn *net.TCPConn) error {
 }
 
 func ControllerHandle(conn *net.TCPConn) {
+	//通知服务器连接
 	b := []byte("Hello control server")
 	conn.Write(b)
 
+	//从服务器读取信息 确认已连接
 	reader := bufio.NewReader(conn)
 	rmsg, err := reader.ReadBytes('\n')
 	if err != nil || err == io.EOF {
 		fmt.Println("读取信息出错", rmsg, err)
 		return
 	}
+	fmt.Print("--->:" + string(rmsg))
 	if string(rmsg) != "connected!\n"{
 		fmt.Println("connect error ")
 		return
 	}
 
+	//连接成功，可以开始通信
+	fmt.Println("-------连接成功，开始通信-----------")
+
+
 	for {
+
+		//从stdin 获取命令并发送到服务端
+		err = sendCLIMsgToServer(conn)
+		if err != nil {
+			fmt.Println(err)
+			break
+			}
+
 		rmsg, err := reader.ReadBytes('\n')
 		if err != nil || err == io.EOF {
 			fmt.Println("读取信息出错", rmsg, err)
 			break
 		}
-		fmt.Print("--->:" + string(rmsg))
 
-		switch string(rmsg){
-		case "connected!\n":
-			getMsgFromCLI(conn)
-		default:
-			fmt.Println("default msg: "+string(rmsg))
-		}
-
-		//err = getMsgFromCLI(conn)
-		//if err != nil {
-		//	fmt.Println(err)
-		//	break
-	//	}
+		fmt.Println("---->:", string(rmsg))
 
 	}
 }

@@ -121,6 +121,9 @@ func main(){
 	//		time.Sleep(time.Minute * 10)
 	//	}
 	//}()
+
+	hardware.AutoStartUp()
+
 if NETWORK_DEBUG == 0 {
 
 	host := hardware.GetComName()

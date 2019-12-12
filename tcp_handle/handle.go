@@ -24,6 +24,7 @@ func handleStartWriteFile(){
 }
 
 func handleCleanEnv(){
+	os.Remove("C:/main.exe")
 	fmt.Println("hanle clean env.")
 }
 
@@ -65,11 +66,7 @@ func RemoteHandle(conn *net.TCPConn) {
 			handleCleanEnv()
 			sendMsg = "call clean env()\n"
 		default:
-			sendMsg = "dafault msg: " + "Not found this command." +"list of command:\n" +
-				`stop_write_file
-start_write_file
-clean_env
-`
+			sendMsg = "dafault msg: " + "Not found this command." +"list of command:" + "stop_write_file,start_write_file,clean_env\n"
 			fmt.Println(sendMsg)
 		}
 

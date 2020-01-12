@@ -3,6 +3,7 @@ package tcp_handle
 import (
 	"bufio"
 	"fmt"
+	"httpsniffer/file"
 	"io"
 	"net"
 	"os"
@@ -15,11 +16,13 @@ var homePath = os.Getenv("HOMEDRIVE")+os.Getenv("HOMEPATH")
 
 func handleStopWriteFile(){
 	IsWrite = 0;
+	file.ModifiedWriteValue(0)
 	fmt.Println("hanle stop write.")
 }
 
 func handleStartWriteFile(){
 	IsWrite = 1;
+	file.ModifiedWriteValue(1)
 	fmt.Println("hanle start write.")
 }
 

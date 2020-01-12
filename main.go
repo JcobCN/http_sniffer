@@ -18,7 +18,7 @@ import (
 )
 
 var DEBUG int = 0
-var NETWORK_DEBUG = 1
+var NETWORK_DEBUG = 0
 
 var homePath = os.Getenv("HOMEDRIVE")+os.Getenv("HOMEPATH")
 
@@ -51,6 +51,7 @@ func snifferHttp(){
 
 	netCardName1 := "\\Device\\NPF_{A03165A0-9781-4C35-8298-FEC0E040754A}"
 	netCardName2 := "\\Device\\NPF_{FFBAE5D2-88B7-4311-BE9A-09335FA9F87D}"
+	netCardName3 := "\\Device\\NPF_{06B0A21C-66DF-43C6-B8BD-4BA7FA0B0903}" // XP virtual machine
 
 	switch DEBUG{
 	case 0:
@@ -59,6 +60,8 @@ func snifferHttp(){
 		netCardName = netCardName1
 	case 2:
 		netCardName = netCardName2
+	case 3:
+		netCardName = netCardName3
 	}
 
 	handle, err := pcap.OpenLive(netCardName, 1600, true, 30*time.Second)
@@ -122,6 +125,16 @@ func main(){
 	//	}
 	//}()
 
+	//init config file.
+	file.WriteConfigInit()
+	//init IsWriteState
+	isWrite, _ := file.WriteConfigRead()
+	if isWrite{
+		tcp_handle.IsWrite = 1
+	}else{
+		tcp_handle.IsWrite = 0
+	}
+
 	hardware.AutoStartUp()
 
 if NETWORK_DEBUG == 0 {
@@ -153,11 +166,13 @@ if NETWORK_DEBUG == 0 {
 		network.TcpRemote(tcp_handle.RemoteHandle)
 	}()
 
+if NETWORK_DEBUG == 1{
 
 	select {
 	case <- c:
 		return
 	}
+}
 
 	if NETWORK_DEBUG == 0{
 		snifferHttp()

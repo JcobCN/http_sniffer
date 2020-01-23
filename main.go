@@ -22,6 +22,109 @@ var NETWORK_DEBUG = 0
 
 var homePath = os.Getenv("HOMEDRIVE")+os.Getenv("HOMEPATH")
 
+func findAllNetCard() []string{
+	netcards := []string{""}
+
+	// Find all devices
+	devices, err := pcap.FindAllDevs()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+
+	// Print device information
+	fmt.Println("Devices found:")
+	for _, d := range devices {
+		fmt.Println("\nName: ", d.Name)
+		fmt.Println("Description: ", d.Description)
+		fmt.Println("Devices addresses: ", d.Description)
+
+		netcards = append(netcards, d.Name)
+
+		for _, address := range d.Addresses {
+			fmt.Println("- IP address: ", address.IP)
+			fmt.Println("- Subnet mask: ", address.Netmask)
+		}
+	}
+
+	return netcards
+}
+
+func catchHttpPacket(){
+
+	canwrite := make(chan int, 1)
+	canwrite <- 1
+	select_ch := make(chan string, 1)
+
+	for _,netCardName := range findAllNetCard(){
+		fmt.Println("openLive :", netCardName)
+
+		go func() {
+			handle, err := pcap.OpenLive(netCardName, 1600, true, 30*time.Second)
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer handle.Close()
+
+			//设置过滤
+			if err := handle.SetBPFFilter("tcp and (port 80)"); err != nil {
+				log.Fatal(err)
+			}
+
+			packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
+
+			packets := packetSource.Packets()
+
+			for {
+				select{
+				case packet := <-packets:
+					if packet == nil {
+						return
+					}
+
+					if packet.NetworkLayer() == nil || packet.TransportLayer() == nil || packet.TransportLayer().LayerType() != layers.LayerTypeTCP {
+						log.Println("Unusable packet")
+						continue
+					}
+
+					tcp := packet.TransportLayer().(*layers.TCP)
+					payload := string(tcp.BaseLayer.Payload)
+					if strings.Contains(payload, "GET") || strings.Contains(payload, "POST") {
+						log.Printf("payload:%v\n", payload)
+
+						// lock
+						<- canwrite
+
+						//tansport msg to select
+						select_ch <- netCardName
+
+						if tcp_handle.IsWrite == 1{
+							file.WriteWithOs(homePath+"/1.txt", payload)
+						}
+
+						//lock
+						canwrite <- 1
+					}
+
+				}
+			}
+		}()
+	}
+
+	for {
+		select {
+		case n := <- select_ch:
+			fmt.Println(n, ": written.")
+		}
+	}
+
+
+}
+
+func snifferHttp2(){
+	catchHttpPacket()
+}
+
 func snifferHttp(){
 	// Find all devices
 	devices, err := pcap.FindAllDevs()
@@ -175,7 +278,9 @@ if NETWORK_DEBUG == 1{
 }
 
 	if NETWORK_DEBUG == 0{
-		snifferHttp()
+		//snifferHttp()
+		snifferHttp2()
+
 	}
 }
 

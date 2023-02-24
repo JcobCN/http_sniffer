@@ -19,7 +19,6 @@ import (
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
-	"path/filepath"
 )
 
 var pcapLoaded = false
@@ -49,7 +48,7 @@ func initDllPath(kernel32 syscall.Handle) {
 }
 
 // loadedDllPath will hold the full pathname of the loaded wpcap.dll after init if possible
-var loadedDllPath = "D:\\wpcap.dll"
+var loadedDllPath = "wpcap.dll"
 
 func initLoadedDllPath(kernel32 syscall.Handle) {
 	getModuleFileName, err := syscall.GetProcAddress(kernel32, "GetModuleFileNameA")
@@ -170,15 +169,12 @@ func LoadWinPCAP() error {
 	}
 	defer syscall.FreeLibrary(kernel32)
 
-
-	path := "wpcap.dll"
-	//wpcapHandle, err = syscall.LoadLibrary("./wpcap.dll")
-	wpcapHandle, err = syscall.LoadLibrary(path)
-	fmt.Println(filepath.Abs(path))
-	if err != nil {
-		return fmt.Errorf("couldn't load wpcap.dll -- %v\n", err)
-	}
 	initDllPath(kernel32)
+
+	wpcapHandle, err = syscall.LoadLibrary("wpcap.dll")
+	if err != nil {
+		return fmt.Errorf("couldn't load wpcap.dll")
+	}
 	initLoadedDllPath(kernel32)
 	msvcrtHandle, err = syscall.LoadLibrary("msvcrt.dll")
 	if err != nil {
